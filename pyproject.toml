@@ -1,0 +1,82 @@
+[tool.poetry]
+name = "jaxrl"
+version = "0.1.0"
+description = ""
+authors = ["Yann Berthelot <yannberthelot1@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+jax = "^0.4.11"
+gym = "^0.26.2"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.3.1"
+isort = "^5.12.0"
+black = "^23.3.0"
+mypy = "^1.3.0"
+flake8 = "^6.0.0"
+tox = "^4.6.0"
+scriv = "^1.3.1"
+coverage = "^7.2.7"
+pre-commit = "^3.3.2"
+pylint = "^2.17.4"
+
+[tool.black]
+line-length = 88
+preview = true
+verbose = true
+
+[tool.isort]
+profile = "black"
+
+[tool.flake8]
+max-line-length = 88
+
+
+[tool.tox]
+legacy_tox_ini = """
+
+[tox]
+isolated_build = True
+envlist =
+    py38
+    linting
+    coverage
+
+[testenv:testing]
+extras = 
+    rlberry
+    sb3
+deps = pyproject.toml
+allowlist_externals = pytest
+changedir = {envtmpdir}  # Move elsewhere to ensure pytest doesn't run from source root.
+commands =
+    pytest {toxinidir}
+
+[testenv:linting]
+deps = pre-commit
+commands = pre-commit run --all-files
+
+[testenv:coverage]
+extras = 
+    rlberry
+    sb3
+deps = 
+    coverage[toml]
+    pyproject.toml
+    pytest
+commands =
+    coverage run --source=probing_environments --branch -m pytest {toxinidir}
+    coverage report -m --fail-under 90
+    coverage xml -o {toxinidir}/coverage.xml
+
+[gh-actions]
+python =
+    3.8: py38, coverage, linting
+"""
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
